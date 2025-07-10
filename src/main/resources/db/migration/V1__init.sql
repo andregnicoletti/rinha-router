@@ -1,0 +1,4 @@
+CREATE TABLE clientes (
+    id UUID PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
