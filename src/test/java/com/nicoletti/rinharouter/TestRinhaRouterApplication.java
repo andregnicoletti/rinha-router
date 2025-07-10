@@ -1,4 +1,4 @@
-package com.nicoletti.rinha_router;
+package com.nicoletti.rinharouter;
 
 import org.springframework.boot.SpringApplication;
 
