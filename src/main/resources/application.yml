@@ -25,3 +25,9 @@ management:
     export:
       prometheus:
         enabled: true
+
+payment:
+  service:
+    url:
+      default: http://localhost:8001
+      fallback: http://localhost:8002

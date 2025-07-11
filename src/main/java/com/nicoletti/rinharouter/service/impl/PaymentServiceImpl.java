@@ -3,9 +3,11 @@ package com.nicoletti.rinharouter.service.impl;
 import com.nicoletti.rinharouter.dto.PaymentProcessorRequest;
 import com.nicoletti.rinharouter.dto.PaymentRequest;
 import com.nicoletti.rinharouter.dto.PaymentProcessorResponse;
+import com.nicoletti.rinharouter.service.api.AnalyzerStatusService;
 import com.nicoletti.rinharouter.service.api.PaymentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -17,21 +19,28 @@ public class PaymentServiceImpl implements PaymentService {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
 
-    private final WebClient webClient;
+    private final AnalyzerStatusService analyzerStatusService;
 
-    public PaymentServiceImpl() {
-        this.webClient = WebClient.builder()
-                .baseUrl("http://localhost:8001")
-                .build();
+    public PaymentServiceImpl(AnalyzerStatusService analyzerStatusService) {
+        this.analyzerStatusService = analyzerStatusService;
     }
 
     @Override
     public Mono<PaymentProcessorResponse> processPayment(String correlationId, double amount) {
 
+        //TODO: decidir qual serviço será chamado
+        //TODO: fazer a requisição post para o serviço de pagamento
+        //TODO: salvar a quantidade de requisições feita e o total de valor processado
+
         PaymentProcessorRequest paymentProcessorRequest = new PaymentProcessorRequest(correlationId, amount, LocalDateTime.now().toString());
         logger.info("Processing payment request: {}", paymentProcessorRequest);
 
-        return webClient.post()
+        String baseUrl = analyzerStatusService.getCurrentBaseUrl();
+
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .build()
+                .post()
                 .uri("/payments")
                 .bodyValue(paymentProcessorRequest)
                 .exchangeToMono(response -> {
