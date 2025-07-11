@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -19,11 +20,17 @@ public class AnalyzerStatusServiceImpl implements AnalyzerStatusService {
 
     private static final Logger logger = LoggerFactory.getLogger(AnalyzerStatusServiceImpl.class);
 
+    private static final String FALLBACK_SERVICE = "fallback";
+
+    private static final String DEFAULT_SERVICE = "default";
+
     private final WebClient webClient = WebClient.create();
 
     private AtomicReference<String> activeBaseUrl;
 
     private static String SERVICE_HEALTH_PATH = "/payments/service-health";
+
+    private Map<String, String> serviceUrls;
 
     @Value("${payment.service.url.default}")
     private String DEFAULT_URL;
@@ -34,7 +41,11 @@ public class AnalyzerStatusServiceImpl implements AnalyzerStatusService {
     @PostConstruct
     public void init() {
         startHealthCheckLoop();
-        activeBaseUrl = new AtomicReference<>(DEFAULT_URL);
+        activeBaseUrl = new AtomicReference<>(DEFAULT_SERVICE);
+        serviceUrls = Map.of(
+                DEFAULT_SERVICE, DEFAULT_URL,
+                FALLBACK_SERVICE, FALLBACK_URL
+        );
     }
 
     private void startHealthCheckLoop() {
@@ -52,16 +63,25 @@ public class AnalyzerStatusServiceImpl implements AnalyzerStatusService {
                 .doOnNext(health -> {
                     boolean failing = health.falling();
                     if (failing) {
-                        activeBaseUrl.set(FALLBACK_URL);
+                        activeBaseUrl.set(FALLBACK_SERVICE);
                         logger.warn("Fallback ativado.");
                     } else {
-                        activeBaseUrl.set(DEFAULT_URL);
+                        activeBaseUrl.set(DEFAULT_SERVICE);
                         logger.info("Serviço saudável. Usando default.");
                     }
-                }).then(); // retorna Mono<Void>
+                }).onErrorResume(ex -> {
+                    activeBaseUrl.set(FALLBACK_SERVICE);
+                    logger.error("Erro ao verificar status, ativando fallback automaticamente.", ex);
+                    return Mono.empty();
+                })
+                .then(); // retorna Mono<Void>
     }
 
     public String getCurrentBaseUrl() {
+        return serviceUrls.get(activeBaseUrl.get());
+    }
+
+    public String getCurrentService() {
         return activeBaseUrl.get();
     }
 }

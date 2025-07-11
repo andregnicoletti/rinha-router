@@ -7,4 +7,6 @@ public interface AnalyzerStatusService {
     Mono<Void> checkStatus();
 
     String getCurrentBaseUrl();
+
+    String getCurrentService();
 }
