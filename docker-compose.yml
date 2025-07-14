@@ -13,6 +13,26 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - payment-processor
+
+  rinha-router:
+    #    build: .
+    image: annicoletti/rinha-router:latest
+    container_name: rinha-router
+    ports:
+      - "9999:9999"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rinha
+      SPRING_DATASOURCE_USERNAME: rinha
+      SPRING_DATASOURCE_PASSWORD: rinha
+      PAYMENT_SERVICE_URL_DEFAULT: http://payment-processor-default:8080
+      PAYMENT_SERVICE_URL_FALLBACK: http://payment-processor-fallback:8080
+      SERVER_PORT: 9999
+    depends_on:
+      - db
+    networks:
+      - payment-processor
 
   prometheus:
     image: prom/prometheus:latest
@@ -21,6 +41,12 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - payment-processor
 
 volumes:
   pgdata:
+
+networks:
+  payment-processor:
+    external: true

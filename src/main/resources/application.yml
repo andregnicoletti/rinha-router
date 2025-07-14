@@ -5,7 +5,7 @@ spring:
   application:
     name: rinha-router
   datasource:
-    url: jdbc:postgresql://localhost:5432/rinha
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rinha}
     username: rinha
     password: rinha
   jpa:
@@ -29,5 +29,5 @@ management:
 payment:
   service:
     url:
-      default: http://localhost:8001
-      fallback: http://localhost:8002
+      default: ${PAYMENT_SERVICE_URL_DEFAULT:http://localhost:8001}
+      fallback: ${PAYMENT_SERVICE_URL_FALLBACK:http://localhost:8002}
