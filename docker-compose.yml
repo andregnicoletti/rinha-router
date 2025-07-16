@@ -1,20 +1,28 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:16
     container_name: rinha-db
     restart: always
-    environment:
-      POSTGRES_USER: rinha
-      POSTGRES_PASSWORD: rinha
-      POSTGRES_DB: rinha
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - rinha-net
+      - payment-processor
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "0.5"
+#          memory: "120MB"
+
+  redis-service:
+    image: redis:latest
+    container_name: rinha-redis
+    ports:
+      - "6379:6379"
+    networks:
       - payment-processor
 #    deploy:
 #      resources:
@@ -25,40 +33,34 @@ services:
   api-1:
     image: annicoletti/rinha-router:latest
     container_name: rinha-router-api-1
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rinha
-      SPRING_DATASOURCE_USERNAME: rinha
-      SPRING_DATASOURCE_PASSWORD: rinha
-      PAYMENT_SERVICE_URL_DEFAULT: http://payment-processor-default:8080
-      PAYMENT_SERVICE_URL_FALLBACK: http://payment-processor-fallback:8080
-      SERVER_PORT: 8080
+    depends_on:
+      - redis-service
+      - db
+    env_file:
+      - .env
     networks:
-      - rinha-net
       - payment-processor
-    deploy:
-      resources:
-        limits:
-          cpus: "0.70"
-          memory: "165MB"
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "0.70"
+#          memory: "150MB"
 
   api-2:
     image: annicoletti/rinha-router:latest
     container_name: rinha-router-api-2
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rinha
-      SPRING_DATASOURCE_USERNAME: rinha
-      SPRING_DATASOURCE_PASSWORD: rinha
-      PAYMENT_SERVICE_URL_DEFAULT: http://payment-processor-default:8080
-      PAYMENT_SERVICE_URL_FALLBACK: http://payment-processor-fallback:8080
-      SERVER_PORT: 8080
+    depends_on:
+      - redis-service
+      - db
+    env_file:
+      - .env
     networks:
-      - rinha-net
       - payment-processor
-    deploy:
-      resources:
-        limits:
-          cpus: "0.70"
-          memory: "165MB"
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "0.70"
+#          memory: "150MB"
 
   nginx:
     image: nginx:alpine
@@ -68,22 +70,19 @@ services:
     ports:
       - "9999:9999"
     networks:
-      - rinha-net
       - payment-processor
-    depends_on:
-      - api-1
-      - api-2
-    deploy:
-      resources:
-        limits:
-          cpus: "0.1"
-          memory: "20MB"
+#    depends_on:
+#      - api-1
+#      - api-2
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "0.1"
+#          memory: "20MB"
 
 volumes:
   pgdata:
 
 networks:
-  rinha-net:
-    driver: bridge
   payment-processor:
     external: true

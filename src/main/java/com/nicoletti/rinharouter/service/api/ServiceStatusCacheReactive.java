@@ -3,10 +3,10 @@ package com.nicoletti.rinharouter.service.api;
 import com.nicoletti.rinharouter.dto.ServiceStatusDTO;
 import reactor.core.publisher.Mono;
 
-public interface AnalyzerStatusService {
+public interface ServiceStatusCacheReactive {
 
-    Mono<Void> checkStatus();
+    Mono<Boolean> setStatus(ServiceStatusDTO dto);
 
-    ServiceStatusDTO getServiceStatus();
+    Mono<ServiceStatusDTO> getStatus();
 
 }

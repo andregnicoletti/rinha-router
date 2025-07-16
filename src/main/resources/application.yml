@@ -15,6 +15,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  redis:
+    host: ${SPRING_REDIS_HOST:redis-service}
+    port: ${SPRING_REDIS_PORT:6379}
 
 management:
   endpoints:

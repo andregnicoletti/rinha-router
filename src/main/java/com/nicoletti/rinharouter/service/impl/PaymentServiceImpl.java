@@ -37,11 +37,8 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentProcessorRequest paymentProcessorRequest = new PaymentProcessorRequest(correlationId, amount, LocalDateTime.now().toString());
         logger.info("Processing payment request: {}", paymentProcessorRequest);
 
-        String baseUrl = analyzerStatusService.getCurrentBaseUrl();
-        String endpointType = analyzerStatusService.getCurrentService();
-
         return WebClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(analyzerStatusService.getServiceStatus().baseUrl())
                 .build()
                 .post()
                 .uri("/payments")
@@ -57,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
                         PaymentTransaction transaction = new PaymentTransaction();
                         transaction.setCorrelationId(correlationId);
                         transaction.setAmount(amount);
-                        transaction.setEndpointType(endpointType);
+                        transaction.setEndpointType(analyzerStatusService.getServiceStatus().serviceName());
                         transaction.setProcessedAt(LocalDateTime.now());
 
 
