@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-COPY target/rinha-router-0.0.1.jar app.jar
+COPY target/rinha-router-1.0.0.jar app.jar
 
 EXPOSE 9999
 

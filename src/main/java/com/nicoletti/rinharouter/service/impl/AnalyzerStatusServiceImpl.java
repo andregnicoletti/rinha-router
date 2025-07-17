@@ -45,7 +45,7 @@ public class AnalyzerStatusServiceImpl implements AnalyzerStatusService {
     }
 
     private void startHealthCheckLoop() {
-        Flux.interval(Duration.ZERO, Duration.ofSeconds(5))
+        Flux.interval(Duration.ZERO, Duration.ofSeconds(2))
                 .flatMap(tick -> checkStatus())
                 .subscribe();
     }
