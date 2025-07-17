@@ -1,89 +1,62 @@
+# Rinha de Backend - API Router (Spring Boot)
 
-# 🐔 Rinha de Backend 2025 - [André Nicoletti](https://github.com/andregnicoletti)
+Este projeto foi desenvolvido para a competição Rinha de Backend, utilizando Spring Boot, Postgres, Redis e Nginx, tudo orquestrado com Docker Compose.
 
-Projeto desenvolvido como solução para o desafio da **Rinha de Backend 2025**. O objetivo é fornecer um serviço robusto, reativo e performático utilizando **Java 21**, **Spring WebFlux**, **PostgreSQL** e **Docker**.
+## Arquitetura
 
----
+- **API**: 2 instâncias do serviço principal em Java (Spring Boot)
+- **Banco de Dados**: Postgres 16
+- **Cache**: Redis
+- **Proxy**: Nginx
 
-## 🚀 Tecnologias
+## Como executar
 
-- **Java 21** (Temurin)
-- **Spring Boot 3.5.3**
-  - Spring WebFlux (Reativo)
-  - Spring Data JPA
-  - Flyway (migração de banco)
-- **PostgreSQL 16**
-- **Docker & Docker Compose**
-- **Prometheus** (monitoramento via Actuator)
+1. **Clonar o repositório:**
+    ```bash
+    git clone https://github.com/andregnicoletti/rinha-router.git
+    cd rinha-router
+    ```
 
----
+2. **Configurar variáveis de ambiente:**
 
-## ⚙️ Como executar localmente
+   Crie um arquivo `.env` com as variáveis necessárias, exemplo:
+    ```env
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=postgres
+    POSTGRES_DB=rinha
+    SPRING_REDIS_HOST=redis-service
+    SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/rinha
+    ```
 
-### 1. Clone o projeto
+3. **Subir os containers:**
+    ```bash
+    docker compose up --build -d
+    ```
 
-```bash
-git clone https://github.com/andregnicoletti/rinha-router.git
-cd rinha-router
-```
+4. **Acesse a API:**
+  - `http://localhost:9999` (via Nginx)
 
-### 2. Compile o projeto
+## Limites de recursos
 
-```bash
-./mvnw clean package -DskipTests
-```
+Conforme exigido na competição:
 
-### 3. Suba a stack Docker
+- **CPU Total:** 1.5 unidades
+- **Memória Total:** 350MB
 
-```bash
-docker compose up -d
-```
+Os limites estão definidos no arquivo `docker-compose.yml`.
 
-✅ **Atenção**: a rede Docker `payment-processor` deve estar criada, caso contrário utilize:
-```bash
-docker network create payment-processor
-```
+## Observações
 
----
+- Recomenda-se ajustar os parâmetros de memória e heap nas aplicações Java conforme necessário para não exceder os limites.
+- O banco e o Redis estão com configurações mínimas, caso haja necessidade de mais recursos, adapte as instâncias de API.
+- O proxy Nginx faz balanceamento simples entre as duas instâncias da API.
 
-## Endpoints principais
+## Contato
 
-- **`POST /payments`**: Processa pagamentos com fallback automático.
-- **`GET /payments-summary?from=...&to=...`**: Retorna resumo de pagamentos por tipo (`default` e `fallback`).
-
----
-
-## 🐳 Docker
-
-### Dockerfile
-
-```dockerfile
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-COPY target/rinha-router.jar app.jar
-EXPOSE 9999
-ENTRYPOINT ["java","-jar","app.jar"]
-```
-
-### docker-compose.yml
-
-> Exemplo completo no repositório. Principais serviços:
-> - Banco `PostgreSQL 16`
-> - Serviço backend `rinha-router`
-> - Monitoramento `Prometheus`
-> - Exposição na porta `9999`
+André Nicoletti  
+[LinkedIn](https://www.linkedin.com/in/andre-nicoletti/)  
+[Email](mailto:andre.nicoletti.dev@gmail.com)
 
 ---
 
-## ✅ Testes Sugeridos
-
-Ferramentas recomendadas:
-- Postman / Newman
-- K6 para testes de carga
-
----
-
-## 👨‍💻 Autor
-
-**André Nicoletti**  
-GitHub: [https://github.com/andregnicoletti](https://github.com/andregnicoletti)
+**Bons benchmarks! 🚀**
